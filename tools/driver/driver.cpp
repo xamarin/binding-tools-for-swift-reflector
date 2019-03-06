@@ -60,6 +60,10 @@ extern int autolink_extract_main(ArrayRef<const char *> Args, const char *Argv0,
 extern int modulewrap_main(ArrayRef<const char *> Args, const char *Argv0,
                            void *MainAddr);
 
+// hawley was here
+extern int xamreflect_main(ArrayRef<const char *> Args, const char *Argv0,
+			void *MainAddr);
+// end hawley
 /// Run 'swift-format'
 extern int swift_format_main(ArrayRef<const char *> Args, const char *Argv0,
                              void *MainAddr);
@@ -123,6 +127,13 @@ static int run_driver(StringRef ExecName,
                                                 argv.data()+argv.size()),
                              argv[0], (void *)(intptr_t)getExecutablePath);
     }
+    // hawley was here
+    if (FirstArg == "-xamreflect") {
+        return xamreflect_main(llvm::makeArrayRef(argv.data()+2,
+                                                  argv.data()+argv.size()),
+                               argv[0], (void *)(intptr_t)getExecutablePath);
+    }
+    // end hawley
     if (FirstArg == "-modulewrap") {
       return modulewrap_main(llvm::makeArrayRef(argv.data()+2,
                                                 argv.data()+argv.size()),

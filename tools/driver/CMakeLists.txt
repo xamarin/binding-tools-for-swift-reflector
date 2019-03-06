@@ -1,14 +1,17 @@
+# hawley was here
 add_swift_host_tool(swift
   api_notes.cpp
   driver.cpp
   autolink_extract_main.cpp
   modulewrap_main.cpp
+  xamarinreflect_main.cpp
   swift_format_main.cpp
   LINK_LIBRARIES
     swiftDriver
     swiftFrontendTool
   SWIFT_COMPONENT compiler
 )
+# end hawley
 
 if(HAVE_UNICODE_LIBEDIT)
   target_link_libraries(swift PRIVATE edit)
