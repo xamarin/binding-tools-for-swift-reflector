@@ -1242,6 +1242,18 @@ bool Parser::parseMatchingToken(tok K, SourceLoc &TokLoc, Diag<> ErrorDiag,
   return false;
 }
 
+bool Parser::parseUnsignedInteger(unsigned &Result, SourceLoc &Loc,
+                                  const Diagnostic &D) {
+  auto IntTok = Tok;
+  if (parseToken(tok::integer_literal, Loc, D))
+    return true;
+  if (IntTok.getText().getAsInteger(0, Result)) {
+    diagnose(IntTok.getLoc(), D);
+    return true;
+  }
+  return false;
+}
+
 Optional<ParsedTokenSyntax> Parser::parseTokenSyntax(tok K, SourceLoc &TokLoc,
                                                      const Diagnostic &D) {
   if (Tok.is(K)) {
