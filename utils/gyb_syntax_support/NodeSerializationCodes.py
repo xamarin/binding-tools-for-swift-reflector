@@ -237,14 +237,13 @@ SYNTAX_NODE_SERIALIZATION_CODES = {
     'LayoutRequirement': 233,
     'LayoutConstraint': 234,
     'OpaqueReturnTypeOfAttributeArguments': 235,
-    'LayoutConstraint': 234,
-    'DifferentiableAttributeArguments': 235,
-    'DifferentiationParamsClause': 236,
-    'DifferentiationParams': 237,
-    'DifferentiationParamList': 238,
-    'DifferentiationParam': 239,
-    'DifferentiableAttributeFuncSpecifier': 240,
-    'FunctionDeclName': 241,
+    'DifferentiableAttributeArguments': 236,
+    'DifferentiationParamsClause': 237,
+    'DifferentiationParams': 238,
+    'DifferentiationParamList': 239,
+    'DifferentiationParam': 240,
+    'DifferentiableAttributeFuncSpecifier': 241,
+    'FunctionDeclName': 242,
 }
 
 
