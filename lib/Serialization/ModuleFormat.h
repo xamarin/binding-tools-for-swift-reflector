@@ -1721,6 +1721,14 @@ namespace decls_block {
     BCArray<BCFixed<1>> // Differentiation parameter indices' bitvector.
   >;
 
+  using TransposingDeclAttrLayout = BCRecordLayout<
+    Transposing_DECL_ATTR,
+    BCFixed<1>, // Implicit flag.
+    IdentifierIDField, // Original name.
+    DeclIDField, // Original function declaration.
+    BCArray<BCFixed<1>> // Differentiation parameter indices' bitvector.
+  >;
+
 #define SIMPLE_DECL_ATTR(X, CLASS, ...)         \
   using CLASS##DeclAttrLayout = BCRecordLayout< \
     CLASS##_DECL_ATTR, \

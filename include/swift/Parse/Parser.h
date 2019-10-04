@@ -1092,6 +1092,14 @@ public:
   bool parseDifferentiationParametersClause(
       SmallVectorImpl<ParsedAutoDiffParameter> &params, StringRef attrName);
 
+  /// Parse a transposing parameters clause.
+  bool parseTransposingParametersClause(
+      SmallVectorImpl<ParsedAutoDiffParameter> &params, StringRef attrName);
+
+  /// Parse a transposing attribute
+  ParserResult<TransposingAttr> parseTransposingAttribute(SourceLoc AtLoc,
+                                                          SourceLoc Loc);
+
   /// Parse a specific attribute.
   ParserStatus parseDeclAttribute(DeclAttributes &Attributes, SourceLoc AtLoc);
 
@@ -1226,7 +1234,7 @@ public:
   parseTypeSimple(Diag<> MessageID, bool HandleCodeCompletion);
   ParsedSyntaxResult<ParsedTypeSyntax>
   parseTypeSimpleOrComposition(Diag<> MessageID, bool HandleCodeCompletion);
-  ParsedSyntaxResult<ParsedTypeSyntax> parseTypeIdentifier();
+  ParsedSyntaxResult<ParsedTypeSyntax> parseTypeIdentifier(bool isParsingQualifiedDeclName = false);
   ParsedSyntaxResult<ParsedTypeSyntax> parseAnyType();
   ParsedSyntaxResult<ParsedTypeSyntax> parseTypeTupleBody();
   ParsedSyntaxResult<ParsedTypeSyntax> parseTypeCollection();
@@ -1441,6 +1449,12 @@ public:
   bool canParseGenericArguments();
 
   bool canParseTypedPattern();
+
+  /// Determines whether a type qualifier for a decl name can be parsed. e.g.:
+  ///   'Foo.f' -> true
+  ///   'Foo.Bar.f' -> true
+  ///   'f' -> false
+  bool canParseTypeQualifierForDeclName();
 
   //===--------------------------------------------------------------------===//
   // Expression Parsing

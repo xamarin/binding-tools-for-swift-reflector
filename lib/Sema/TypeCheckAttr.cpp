@@ -108,6 +108,7 @@ public:
 
   // TODO: Changes are yet to be upstreamed from apple/tensorflow branch.
   IGNORED_ATTR(Differentiable)
+  IGNORED_ATTR(Transposing)
 #undef IGNORED_ATTR
 
   void visitAlignmentAttr(AlignmentAttr *attr) {

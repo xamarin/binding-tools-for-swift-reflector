@@ -62,6 +62,8 @@ ATTRIBUTE_NODES = [
                              kind='ImplementsAttributeArguments'),
                        Child('DifferentiableArguments',
                              kind='DifferentiableAttributeArguments'),
+                       Child('TransposingArguments',
+                             kind='DifferentiableAttributeArguments'),  # TODO(saeta): This should be 'DifferentiatingAttributeArguments'!
                        Child('NamedAttributeString',
                              kind='NamedAttributeStringArgument'),
                        Child('OpaqueReturnTypeOfArguments',
@@ -325,6 +327,22 @@ ATTRIBUTE_NODES = [
                    description='The referenced function name.'),
              Child('TrailingComma', kind='CommaToken', is_optional=True),
          ]),
+
+     # The argument of '@transposing(...)'.
+     # transposing-attr-arguments ->
+     #     func-decl-name ','? differentiable-attr-parameters?
+     Node('TransposingAttributeArguments', kind='Syntax',
+          description='''
+            The arguments for the `@transposing` attribute: the original
+            function and an optional differentiation parameter list.
+            ''',
+          children=[
+                    Child('Original', kind='FunctionDeclName',
+                          description='The referenced original function.'),
+                    Child('Comma', kind='CommaToken', is_optional=True),
+                    Child('DiffParams', kind='DifferentiationParamsClause',
+                          is_optional=True),
+                    ]),
 
     # func-decl-name -> (identifier | operator) decl-name-arguments?
     # NOTE: This is duplicated with `DeclName` above. Change `DeclName`

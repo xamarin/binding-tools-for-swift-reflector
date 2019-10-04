@@ -63,6 +63,7 @@ struct MyStruct {}
 // KEYWORD2-NEXT:             Keyword/None:                       usableFromInline[#Func Attribute#]; name=usableFromInline
 // KEYWORD2-NEXT:             Keyword/None:                       discardableResult[#Func Attribute#]; name=discardableResult
 // KEYWORD2-NEXT:             Keyword/None:                       differentiable[#Func Attribute#]; name=differentiable
+// KEYWORD2-NEXT:             Keyword/None:                       transposing[#Func Attribute#]; name=transposing
 // KEYWORD2-NEXT:             Keyword/None:                       IBSegueAction[#Func Attribute#]; name=IBSegueAction{{$}}
 // KEYWORD2-NOT:              Keyword
 // KEYWORD2:                  Decl[Struct]/CurrModule:            MyStruct[#MyStruct#]; name=MyStruct
@@ -274,6 +275,7 @@ func dummy2() {}
 // KEYWORD_LAST-NEXT:             Keyword/None:                       propertyWrapper[#Declaration Attribute#]; name=propertyWrapper
 // KEYWORD_LAST-NEXT:             Keyword/None:                       _functionBuilder[#Declaration Attribute#]; name=_functionBuilder{{$}}
 // KEYWORD_LAST-NEXT:             Keyword/None:                       differentiable[#Declaration Attribute#]; name=differentiable
+// KEYWORD_LAST-NEXT:             Keyword/None:                       transposing[#Declaration Attribute#]; name=transposing
 // KEYWORD_LAST-NEXT:             Keyword/None:                       IBSegueAction[#Declaration Attribute#]; name=IBSegueAction{{$}}
 // KEYWORD_LAST-NOT:              Keyword
 // KEYWORD_LAST: Decl[Struct]/CurrModule:            MyStruct[#MyStruct#]; name=MyStruct

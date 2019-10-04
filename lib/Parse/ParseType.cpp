@@ -592,36 +592,60 @@ ParserStatus Parser::parseGenericArguments(SmallVectorImpl<TypeRepr *> &ArgsAST,
   return makeParserSuccess();
 }
 
+bool Parser::canParseTypeQualifierForDeclName() {
+  BacktrackingScope backtrack(*this);
+
+  // First, parse a single type identifier component.
+  if (!Tok.isAny(tok::identifier, tok::kw_Self, tok::kw_Any))
+    return false;
+  consumeToken();
+
+  if (startsWithLess(Tok)) {
+    if (!canParseGenericArguments())
+      return false;
+  }
+
+  // If the next token is a period or starts with a period, then this can be
+  // parsed as a type qualifier.
+  return startsWithSymbol(Tok, '.');
+}
+
 /// parseTypeIdentifier
 ///
 ///   type-identifier:
 ///     identifier generic-args? ('.' identifier generic-args?)*
 ///
-ParsedSyntaxResult<ParsedTypeSyntax> Parser::parseTypeIdentifier() {
-  if (Tok.isNot(tok::identifier) && Tok.isNot(tok::kw_Self)) {
-    // is this the 'Any' type
-    if (Tok.is(tok::kw_Any))
-      return parseAnyType();
-
-    if (Tok.is(tok::code_complete)) {
-      auto CCTok = consumeTokenSyntax(tok::code_complete);
-      auto ty = ParsedSyntaxRecorder::makeCodeCompletionType(
-          None, None, std::move(CCTok), *SyntaxContext);
-      return makeParsedCodeCompletion(std::move(ty));
-    }
-
-    diagnose(Tok, diag::expected_identifier_for_type);
-
-    // If there is a keyword at the start of a new line, we won't want to
-    // skip it as a recovery but rather keep it.
-    if (Tok.isKeyword() && !Tok.isAtStartOfLine()) {
-      auto kwTok = consumeTokenSyntax();
-      ParsedTypeSyntax ty =
-          ParsedSyntaxRecorder::makeUnknownType({&kwTok, 1}, *SyntaxContext);
-      return makeParsedError(std::move(ty));
-    }
-
+ParsedSyntaxResult<ParsedTypeSyntax>
+Parser::parseTypeIdentifier(bool isParsingQualifiedDeclName) {
+  if (isParsingQualifiedDeclName && !canParseTypeQualifierForDeclName())
     return makeParsedError<ParsedTypeSyntax>();
+
+  if (!isParsingQualifiedDeclName || Tok.isNotAnyOperator()) {
+    if (Tok.isNot(tok::identifier) && Tok.isNot(tok::kw_Self)) {
+      // is this the 'Any' type
+      if (Tok.is(tok::kw_Any))
+        return parseAnyType();
+
+      if (Tok.is(tok::code_complete)) {
+        auto CCTok = consumeTokenSyntax(tok::code_complete);
+        auto ty = ParsedSyntaxRecorder::makeCodeCompletionType(
+            None, None, std::move(CCTok), *SyntaxContext);
+        return makeParsedCodeCompletion(std::move(ty));
+      }
+
+      diagnose(Tok, diag::expected_identifier_for_type);
+
+      // If there is a keyword at the start of a new line, we won't want to
+      // skip it as a recovery but rather keep it.
+      if (Tok.isKeyword() && !Tok.isAtStartOfLine()) {
+        auto kwTok = consumeTokenSyntax();
+        ParsedTypeSyntax ty =
+            ParsedSyntaxRecorder::makeUnknownType({&kwTok, 1}, *SyntaxContext);
+        return makeParsedError(std::move(ty));
+      }
+
+      return makeParsedError<ParsedTypeSyntax>();
+    }
   }
 
   SmallVector<ParsedSyntax, 0> Junk;
@@ -673,8 +697,28 @@ ParsedSyntaxResult<ParsedTypeSyntax> Parser::parseTypeIdentifier() {
         peekToken().isContextualKeyword("Protocol"))
       break;
 
+    if (isParsingQualifiedDeclName) {
+      // If we're parsing a qualified decl name, break out before parsing the
+      // last period.
+
+      BacktrackingScope backtrack(*this);
+
+      if (Tok.is(tok::period) || Tok.is(tok::period_prefix))
+        consumeToken();
+      else if (startsWithSymbol(Tok, '.'))
+        consumeStartingCharacterOfCurrentToken(tok::period);
+
+      if (!canParseTypeQualifierForDeclName())
+        break;
+    }
+
     // Parse '.'.
     auto period = consumeTokenSyntax();
+
+    if (isParsingQualifiedDeclName && Tok.isAnyOperator()) {
+      // If an operator is encountered, break and do not backtrack later.
+      break;
+    }
 
     // Parse component;
     Optional<ParsedTokenSyntax> identifier;

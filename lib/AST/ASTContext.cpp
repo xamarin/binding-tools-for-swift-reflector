@@ -434,6 +434,12 @@ FOR_KNOWN_FOUNDATION_TYPES(CACHE_FOUNDATION_DECL)
 
   llvm::StringMap<OptionSet<SearchPathKind>> SearchPathsSet;
 
+  /// For uniquifying `AutoDiffParameterIndices` allocations.
+  llvm::FoldingSet<AutoDiffParameterIndices> AutoDiffParameterIndicesSet;
+
+  /// For uniquifying `AutoDiffIndexSubset` allocations.
+  llvm::FoldingSet<AutoDiffIndexSubset> AutoDiffIndexSubsets;
+
   /// The permanent arena.
   Arena Permanent;
 
@@ -4617,4 +4623,50 @@ void VarDecl::setOriginalWrappedProperty(VarDecl *originalProperty) {
   ASTContext &ctx = getASTContext();
   assert(ctx.getImpl().OriginalWrappedProperties.count(this) == 0);
   ctx.getImpl().OriginalWrappedProperties[this] = originalProperty;
+}
+
+AutoDiffParameterIndices *
+AutoDiffParameterIndices::get(llvm::SmallBitVector indices, ASTContext &C) {
+  auto &foldingSet = C.getImpl().AutoDiffParameterIndicesSet;
+
+  llvm::FoldingSetNodeID id;
+  id.AddInteger(indices.size());
+  for (unsigned setBit : indices.set_bits())
+    id.AddInteger(setBit);
+
+  void *insertPos;
+  auto *existing = foldingSet.FindNodeOrInsertPos(id, insertPos);
+  if (existing)
+    return existing;
+
+  // TODO(SR-9290): Note that the AutoDiffParameterIndices' destructor never
+  // gets called, which causes a small memory leak in the case that the
+  // SmallBitVector decides to allocate some heap space.
+  void *mem = C.Allocate(sizeof(AutoDiffParameterIndices),
+                         alignof(AutoDiffParameterIndices));
+  auto *newNode = ::new (mem) AutoDiffParameterIndices(indices);
+  foldingSet.InsertNode(newNode, insertPos);
+
+  return newNode;
+}
+
+AutoDiffIndexSubset *
+AutoDiffIndexSubset::get(ASTContext &ctx, const SmallBitVector &indices) {
+  auto &foldingSet = ctx.getImpl().AutoDiffIndexSubsets;
+  llvm::FoldingSetNodeID id;
+  unsigned capacity = indices.size();
+  id.AddInteger(capacity);
+  for (unsigned index : indices.set_bits())
+    id.AddInteger(index);
+  void *insertPos = nullptr;
+  auto *existing = foldingSet.FindNodeOrInsertPos(id, insertPos);
+  if (existing)
+    return existing;
+  auto sizeToAlloc = sizeof(AutoDiffIndexSubset) +
+      getNumBitWordsNeededForCapacity(capacity);
+  auto *buf = reinterpret_cast<AutoDiffIndexSubset *>(
+      ctx.Allocate(sizeToAlloc, alignof(AutoDiffIndexSubset)));
+  auto *newNode = new (buf) AutoDiffIndexSubset(indices);
+  foldingSet.InsertNode(newNode, insertPos);
+  return newNode;
 }
