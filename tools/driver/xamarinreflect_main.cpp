@@ -620,14 +620,15 @@ private:
             _out << module->getFullName() << '.' << proto->getFullName();
         }
         else if (ty->getKind() == TypeKind::ProtocolComposition) {
-            // ProtocolComposition types (p: A & B) have the same issue as protocols. For whatever reason,
-            // the swift code doesn't print the fully qualified name.
-            ExistentialLayout layout = ty->getExistentialLayout();
-            printExistentialLayout (layout, optionalKind);
-        } else if (ty->isAny()) {
-            _out << "Swift.Any";
-        }
-        else {
+            if (ty->isAny()) {
+                _out << "Swift.Any";
+            } else {
+                // ProtocolComposition types (p: A & B) have the same issue as protocols. For whatever reason,
+                // the swift code doesn't print the fully qualified name.
+                ExistentialLayout layout = ty->getExistentialLayout();
+                printExistentialLayout (layout, optionalKind);
+            }
+        } else {
             visitPart(ty->getDesugaredType(), optionalKind);
         }
         
