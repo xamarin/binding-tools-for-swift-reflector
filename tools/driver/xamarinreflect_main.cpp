@@ -624,6 +624,8 @@ private:
             // the swift code doesn't print the fully qualified name.
             ExistentialLayout layout = ty->getExistentialLayout();
             printExistentialLayout (layout, optionalKind);
+        } else if (ty->isAny()) {
+            _out << "Swift.Any";
         }
         else {
             visitPart(ty->getDesugaredType(), optionalKind);
