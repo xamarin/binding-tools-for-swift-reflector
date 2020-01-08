@@ -310,11 +310,12 @@ private:
             auto conformingProtos = assocType->getConformingProtocols ();
             auto superClass = assocType->getSuperclass ();
             
+            indents();
             _out << "<associatedtype name=\"";
             filterString (name.str());
             
             if (defaultDefn) {
-                _out << "\" defaultType=\"";
+                _out << "\" defaulttype=\"";
                 print(defaultDefn, OTK_None);
             }
             _out << "\">\n";
@@ -343,7 +344,7 @@ private:
                 exdent();
             }
             indents();
-            _out << "</associatedtype>";
+            _out << "</associatedtype>\n";
         }
         
         exdent();
