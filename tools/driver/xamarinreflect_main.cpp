@@ -225,7 +225,8 @@ private:
     void handleNominal(NominalTypeDecl *ND, std::string label)
     {
         indents();
-        EnumDecl *ED = isa<EnumDecl>(*ND) ?(EnumDecl *)ND : 0;
+        EnumDecl *ED = isa<EnumDecl>(*ND) ? (EnumDecl *)ND : 0;
+        ProtocolDecl *PD = isa<ProtocolDecl>(*ND) ? (ProtocolDecl *)ND : 0;
         
         _out << "<typedeclaration kind=\"" << label << "\" name=\"" << ND->getName() << "\"";
         bool isOpen = false;
@@ -288,9 +289,67 @@ private:
             indents();
             _out << "</elements>\n";
         }
+        if (PD)
+            printAssociatedTypes (PD);
         exdent();
         indents();
         _out << "</typedeclaration>\n";
+    }
+    
+    void printAssociatedTypes (ProtocolDecl *PD)
+    {
+        auto assocTypes = PD->getAssociatedTypeMembers ();
+        if (assocTypes.size() == 0)
+            return;
+        indents();
+        _out << "<associatedtypes>\n";
+        indent();
+        for (auto assocType : assocTypes) {
+            auto name = assocType->getName ();
+            auto defaultDefn = assocType->getDefaultDefinitionType ();
+            auto conformingProtos = assocType->getConformingProtocols ();
+            auto superClass = assocType->getSuperclass ();
+            
+            indents();
+            _out << "<associatedtype name=\"";
+            filterString (name.str());
+            
+            if (defaultDefn) {
+                _out << "\" defaulttype=\"";
+                print(defaultDefn, OTK_None);
+            }
+            _out << "\">\n";
+            if (superClass || conformingProtos.size() > 0) {
+                indent();
+                if (superClass) {
+                    indents();
+                    _out << "<superclass name=\"";
+                    print(superClass, OTK_None);
+                    _out << "/>\n";
+                }
+                if (conformingProtos.size() > 0) {
+                    indents();
+                    _out << "<conformingprotocols>\n";
+                    indent();
+                    for (auto conformingProto : conformingProtos) {
+                        indents();
+                        _out << "<conformingprotocol name=\"";
+                        filterString(conformingProto->getName().str());
+                        _out << "\"/>\n";
+                    }
+                    exdent();
+                    indents();
+                    _out << "</conformingprotocols>\n";
+                }
+                exdent();
+            }
+            indents();
+            _out << "</associatedtype>\n";
+        }
+        
+        exdent();
+        indents();
+        _out << "</associatedtypes>";
     }
     
     // this is handy for debugging
