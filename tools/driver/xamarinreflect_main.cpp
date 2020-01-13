@@ -325,7 +325,7 @@ private:
                     indents();
                     _out << "<superclass name=\"";
                     print(superClass, OTK_None);
-                    _out << "/>\n";
+                    _out << "\" />\n";
                 }
                 if (conformingProtos.size() > 0) {
                     indents();
@@ -334,7 +334,10 @@ private:
                     for (auto conformingProto : conformingProtos) {
                         indents();
                         _out << "<conformingprotocol name=\"";
-                        filterString(conformingProto->getName().str());
+                        auto name = conformingProto->getName().str();
+                        auto module = conformingProto->getModuleContext();
+                        _out << module->getFullName() << '.';
+                        filterString(name);
                         _out << "\"/>\n";
                     }
                     exdent();
@@ -349,7 +352,7 @@ private:
         
         exdent();
         indents();
-        _out << "</associatedtypes>";
+        _out << "</associatedtypes>\n";
     }
     
     // this is handy for debugging
