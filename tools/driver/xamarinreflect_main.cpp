@@ -719,7 +719,7 @@ private:
         // instead of the protocol type.
         
         
-        if (parentProtocol && (param->getInterfaceType()->getString() == "Self" || param->getInterfaceType()->getString() == "inout Self")) {
+        if (parentProtocol && (param->getInterfaceType()->getString() == "Self" || param->getInterfaceType()->getString() == "inout Self") && parentProtocol->existentialTypeSupported (nullptr)) {
             _out << _m->getName().str() << "." << currentProtocol;
         }
         else {
@@ -795,7 +795,7 @@ private:
             indent();
             indents();
             _out << "<parameter type=\"";
-            if (parentProtocol && (curTy->getString() == "Self" || curTy->getString() == "inout Self")) {
+            if (parentProtocol && (curTy->getString() == "Self" || curTy->getString() == "inout Self") && parentProtocol->existentialTypeSupported (nullptr)) {
                 _out << _m->getName().str() << "." << currentProtocol;
             }
             else {
