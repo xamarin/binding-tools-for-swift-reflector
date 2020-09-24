@@ -1128,6 +1128,7 @@ int xamreflect_main(ArrayRef<const char *>Args,
     if (!out) {
         Instance.getDiags().diagnose(SourceLoc(), diag::error_opening_output,
                                      outputPath, EC.message());
+        return 1;
     }
     
     std::vector<std::string> fileNames;
@@ -1146,13 +1147,16 @@ int xamreflect_main(ArrayRef<const char *>Args,
     
     *out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<xamreflect version=\"1.0\">\n   <modulelist>\n";
     
+    int filesProcessed = 0, filesFailed = 0;
     for (auto fileName = fileNames.begin(); fileName != fileNames.end(); fileName++)
     {
+        filesProcessed++;
         ASTContext &astctx = Instance.getASTContext();
         Identifier modName = astctx.getIdentifier(*fileName);
         auto *module = astctx.getModule({ std::make_pair(modName, SourceLoc()) });
         if (!module)
         {
+            filesFailed++;
             Instance.getDiags().diagnose(SourceLoc(), diag::error_open_input_file,
                                          *fileName, EC.message());
         }
@@ -1163,8 +1167,9 @@ int xamreflect_main(ArrayRef<const char *>Args,
     
     out->flush();
     
-    
-    return 0;
+    // if every file fails, return 1 since we got no useful output, else return 0 because
+    // we got some useful output
+    return filesFailed == filesProcessed ? 1 : 0;
 }
 
 
