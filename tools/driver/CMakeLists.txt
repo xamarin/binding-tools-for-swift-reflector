@@ -1,5 +1,8 @@
 add_swift_host_tool(swift
   driver.cpp
+# hawley was here
+  xamarinreflect_main.cpp
+# end hawley
   autolink_extract_main.cpp
   modulewrap_main.cpp
   swift_indent_main.cpp
