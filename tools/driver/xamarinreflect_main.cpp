@@ -336,7 +336,7 @@ private:
                         _out << "<conformingprotocol name=\"";
                         auto name = conformingProto->getName().str();
                         auto module = conformingProto->getModuleContext();
-                        _out << module->getFullName() << '.';
+                        _out << module->getName() << '.';
                         filterString(name);
                         _out << "\"/>\n";
                     }
@@ -363,9 +363,7 @@ private:
             case TypeKind::BuiltinIntegerLiteral: return "BuiltinIntegerLiteral";
             case TypeKind::BuiltinFloat: return "BuiltinFloat";
             case TypeKind::BuiltinRawPointer: return "BuiltinRawPointer";
-            case TypeKind::BuiltinNativeObject: return "BuiltinNativeObject";
             case TypeKind::BuiltinBridgeObject: return "BuiltinBridgeObject";
-            case TypeKind::BuiltinUnknownObject: return "BuiltinUnknownObject";
             case TypeKind::BuiltinUnsafeValueBuffer: return "BuiltinUnsafeValueBuffer";
             case TypeKind::BuiltinVector: return "BuiltinVector";
             case TypeKind::Tuple: return "Tuple";
@@ -373,6 +371,7 @@ private:
             case TypeKind::Struct: return "Struct";
             case TypeKind::Class: return "Class";
             case TypeKind::Protocol: return "Protocol";
+            case TypeKind::Error: return "Error";
             case TypeKind::BoundGenericClass: return "BoundGenericClass";
             case TypeKind::BoundGenericEnum: return "BoundGenericEnum";
             case TypeKind::BoundGenericStruct: return "BoundGenericStruct";
@@ -381,7 +380,10 @@ private:
             case TypeKind::ExistentialMetatype: return "ExistentialMetatype";
             case TypeKind::Module: return "Module";
             case TypeKind::DynamicSelf: return "DynamicSelf";
-            case TypeKind::Archetype: return "Archetype";
+            case TypeKind::PrimaryArchetype: return "PrimaryArchetype";
+            case TypeKind::OpenedArchetype: return "OpenArchetype";
+            case TypeKind::NestedArchetype: return "NestedArchetype";
+            case TypeKind::OpaqueTypeArchetype: return "OpaqueTypeArchetype";
             case TypeKind::GenericTypeParam: return "GenericTypeParam";
             case TypeKind::DependentMember: return "DependentMember";
             case TypeKind::Function: return "Function";
@@ -398,6 +400,7 @@ private:
             case TypeKind::ArraySlice: return "ArraySlice";
             case TypeKind::Optional: return "Optional";
             case TypeKind::Dictionary: return "Dictionary";
+            case TypeKind::Unresolved: return "Unresolved";
             default: return "unknown";
         }
     }
@@ -438,7 +441,7 @@ private:
                 opts.FullyQualifiedTypes = true;
                 _out << "<inherit type=\"";
                 auto module = proto->getModuleContext();
-                _out << module->getFullName() << '.' << proto->getFullName();
+                _out << module->getName() << '.' << proto->getName();
                 _out << "\" inheritanceKind=\"protocol\"/>\n";
             }
             
@@ -533,20 +536,20 @@ private:
         << " />\n";
 
     bool isComputed = storageInfo.getReadImpl() == ReadImplKind::Get;
-	if (!VD->getDeclContext()->isTypeContext() && isComputed && VD->getGetter() != nullptr) {
-                printAbstractFunction(VD->getGetter(), false, false);
-                if (VD->getSetter() != nullptr)
-                        printAbstractFunction(VD->getSetter(), false, false);
+	if (!VD->getDeclContext()->isTypeContext() && isComputed && VD->getOpaqueAccessor(AccessorKind::Get) != nullptr) {
+                printAbstractFunction(VD->getOpaqueAccessor(AccessorKind::Get), false, false);
+                if (VD->getOpaqueAccessor(AccessorKind::Set) != nullptr)
+                        printAbstractFunction(VD->getOpaqueAccessor(AccessorKind::Set), false, false);
         }
     }
     
     
-    void visitNameAliasType(NameAliasType *aliasTy,
+    void visitTypeAliasType(TypeAliasType *aliasTy,
                             Optional<OptionalTypeKind> optionalKind) {
         const TypeAliasDecl *alias = aliasTy->getDecl();
         _out << alias->getNameStr();
-        if (alias->getUnderlyingTypeLoc().getType())
-            visitPart(alias->getUnderlyingTypeLoc().getType(), optionalKind);
+        if (alias->getUnderlyingType ())
+            visitPart(alias->getUnderlyingType (), optionalKind);
     }
     
     void filterString(std::string str)
@@ -602,11 +605,11 @@ private:
             ProtocolType *PT = dyn_cast<ProtocolType>(canon);
             auto proto = PT->getDecl();
             auto module = proto->getModuleContext();
-            _out << module->getFullName() << '.' << proto->getFullName();
+            _out << module->getName() << '.' << proto->getName();
         } else {
             PrintOptions opts;
             opts.FullyQualifiedTypes = true;
-            opts.PrintNameAliasUnderlyingType = true;
+            opts.PrintTypeAliasUnderlyingType = true;
             std::string result = Ty->getString(opts);
             filterString(result);
         }
@@ -679,7 +682,7 @@ private:
             ProtocolType *PT = dyn_cast<ProtocolType>(canon);
             auto proto = PT->getDecl();
             auto module = proto->getModuleContext();
-            _out << module->getFullName() << '.' << proto->getFullName();
+            _out << module->getName() << '.' << proto->getName();
         }
         else if (ty->getKind() == TypeKind::ProtocolComposition) {
             if (ty->isAny()) {
@@ -719,7 +722,7 @@ private:
         // instead of the protocol type.
         
         
-        if (parentProtocol && (param->getInterfaceType()->getString() == "Self" || param->getInterfaceType()->getString() == "inout Self") && parentProtocol->existentialTypeSupported (nullptr)) {
+        if (parentProtocol && (param->getInterfaceType()->getString() == "Self" || param->getInterfaceType()->getString() == "inout Self") && parentProtocol->existentialTypeSupported ()) {
             _out << _m->getName().str() << "." << currentProtocol;
         }
         else {
@@ -728,7 +731,7 @@ private:
                 print (param->getInterfaceType()->getInOutObjectType(), OTK_None);
             }
             else {
-                bool isEscaping = paramFlags.isEscaping();
+                bool isEscaping = paramFlags.isNonEphemeral ();
                 // why square brackets, you might ask?
                 // It turns out that the language of attributes in swift is ambiguous.
                 // You can have
@@ -770,7 +773,8 @@ private:
             indents();
             _out << "<parameter index=\"" << i << "\"";
             auto p = params[i];
-            auto flags = ParameterTypeFlags::fromParameterType(p->getInterfaceType(), p->isVariadic(), p->isAutoClosure(), p->getValueOwnership());
+            // note to future: at the time of 5.3, there was no p->isNoDerivative call
+            auto flags = ParameterTypeFlags::fromParameterType(p->getInterfaceType(), p->isVariadic(), p->isAutoClosure(), p->isNonEphemeral(), p->getValueOwnership(), false);
             printSingleMethodParam(p, i == params.size() - 1, parentProtocol, flags);
             _out << "/>\n";
         }
@@ -795,7 +799,7 @@ private:
             indent();
             indents();
             _out << "<parameter type=\"";
-            if (parentProtocol && (curTy->getString() == "Self" || curTy->getString() == "inout Self") && parentProtocol->existentialTypeSupported (nullptr)) {
+            if (parentProtocol && (curTy->getString() == "Self" || curTy->getString() == "inout Self") && parentProtocol->existentialTypeSupported ()) {
                 _out << _m->getName().str() << "." << currentProtocol;
             }
             else {
@@ -830,7 +834,7 @@ private:
         _out << "</parameterlists>\n";
     }
     
-    void printGenerics(GenericSignature *generics, bool isProtocol)
+    void printGenerics(GenericSignature generics, bool isProtocol)
     {
         bool hasSome = false;
         for (auto gen : generics->getGenericParams()) {
@@ -928,7 +932,7 @@ private:
         //        Type theType = AFD->getType();
         //        auto theKind = theType->getKind();
         //        ObjCSelector sel = AFD->getObjCSelector();
-        //        DeclName declName = AFD->getFullName();
+        //        DeclName declName = AFD->getName();
         
         
         auto ty = AFD->getDeclContext()->isTypeContext() ?
@@ -1152,8 +1156,7 @@ int xamreflect_main(ArrayRef<const char *>Args,
     {
         filesProcessed++;
         ASTContext &astctx = Instance.getASTContext();
-        Identifier modName = astctx.getIdentifier(*fileName);
-        auto *module = astctx.getModule({ std::make_pair(modName, SourceLoc()) });
+        auto *module = astctx.getModuleByName (*fileName);
         if (!module)
         {
             filesFailed++;
