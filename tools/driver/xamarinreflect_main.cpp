@@ -964,17 +964,12 @@ private:
         //        DeclName declName = AFD->getName();
         
         auto resultTy = getAbstractFunctionReturnType (AFD);
-//        auto ty = AFD->getDeclContext()->isTypeContext() ?
-//        AFD->getMethodInterfaceType() : AFD->getInterfaceType();
         
         AbstractStorageDecl *AD = nullptr;
         if (isa<AccessorDecl>(AFD)) {
             auto acc = cast<AccessorDecl>(AFD);
             AD = acc->getStorage();
         }
-        
-//        Type resultTy = ty->castTo<AnyFunctionType>()->getResult();
-//        resultTy = resultTy->getDesugaredType ();
         
         bool isDeprecated = AFD->getAttrs().getDeprecated(AFD->getASTContext());
         std::string flagAsDeprecated = isDeprecated ?
