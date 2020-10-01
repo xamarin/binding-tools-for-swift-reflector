@@ -268,7 +268,7 @@ private:
             indent();
             for (auto Elt : ED->getAllElements()) {
                 indents();
-                _out << "<element name=\"" << Elt->getName() << "\"";
+                _out << "<element name=\"" << Elt->getBaseIdentifier ().str () << "\"";
                 auto argTy = Elt->getArgumentInterfaceType();
                 if (argTy) {
                     _out << " type=\"";
@@ -504,43 +504,59 @@ private:
         }
     }
     
-    void visitVarDecl(VarDecl *VD)
+    void handleAbstractStorageDecl (AbstractStorageDecl *AD, bool isLet, bool isSubscript)
     {
         indents();
         
-        auto storageInfo = VD->getImplInfo();
-        AccessLevel effaccess = VD->getFormalAccess();
-        bool isDeprecated = VD->getAttrs().getDeprecated(VD->getASTContext());
-        bool isUnavailable = VD->getAttrs().getUnavailable(VD->getASTContext()) != nullptr;
-        bool isOptional = VD->getAttrs().getAttribute<OptionalAttr>() != 0;
+        auto storageInfo = AD->getImplInfo();
+        AccessLevel effaccess = AD->getFormalAccess();
+        bool isDeprecated = AD->getAttrs().getDeprecated(AD->getASTContext());
+        bool isUnavailable = AD->getAttrs().getUnavailable(AD->getASTContext()) != nullptr;
+        bool isOptional = AD->getAttrs().getAttribute<OptionalAttr>() != 0;
 
-        
-        _out << "<property name=\"" << VD->getName() << "\" type=\"";
-        
-        print(VD->getInterfaceType(), OTK_None);
-        
-        _out << "\" storage=\"" << ToString(storageInfo) << "\""
-        
-        << " accessibility=\"" << ToString(effaccess) << "\""
-        
-        << " isDeprecated=\"" << (isDeprecated ? "true\"" : "false\"")
-        
-        << " isUnavailable=\"" << (isUnavailable ? "true\"" : "false\"")
-        
-        << " isStatic=\"" << (VD->isStatic() ? "true\"" : "false\"")
-        
-        << " isLet=\"" << (VD->isLet() ? "true\"" : "false\"")
-        
-        << " isOptional=\"" << (isOptional ? "true\"" : "false\"")
-        
-        << " />\n";
+        Type type = AD->getAccessor(AccessorKind::Get) != nullptr ?
+            getAbstractFunctionReturnType(AD->getAccessor (AccessorKind::Get)) :
+            AD->getInterfaceType();
+            
+        auto name = isSubscript ? "subscript" : AD->getBaseIdentifier ().str ();
 
-    bool isComputed = storageInfo.getReadImpl() == ReadImplKind::Get;
-	if (!VD->getDeclContext()->isTypeContext() && isComputed && VD->getOpaqueAccessor(AccessorKind::Get) != nullptr) {
-                printAbstractFunction(VD->getOpaqueAccessor(AccessorKind::Get), false, false);
-                if (VD->getOpaqueAccessor(AccessorKind::Set) != nullptr)
-                        printAbstractFunction(VD->getOpaqueAccessor(AccessorKind::Set), false, false);
+        if (!isSubscript) {
+            _out << "<property name=\"" << name << "\" type=\"";
+            
+            print(type, OTK_None);
+            
+            _out << "\" storage=\"" << ToString(storageInfo) << "\""
+            
+            << " accessibility=\"" << ToString(effaccess) << "\""
+            
+            << " isDeprecated=\"" << (isDeprecated ? "true\"" : "false\"")
+            
+            << " isUnavailable=\"" << (isUnavailable ? "true\"" : "false\"")
+            
+            << " isStatic=\"" << (AD->isStatic() ? "true\"" : "false\"")
+            
+            << " isLet=\"" << (isLet ? "true\"" : "false\"")
+            
+            << " isOptional=\"" << (isOptional ? "true\"" : "false\"")
+            
+            << " />\n";
         }
+
+        if (AD->getAccessor(AccessorKind::Get) != nullptr) {
+                printAbstractFunction(AD->getAccessor(AccessorKind::Get), false, false);
+                if (AD->getAccessor(AccessorKind::Set) != nullptr)
+                        printAbstractFunction(AD->getAccessor(AccessorKind::Set), false, false);
+        }
+    }
+    
+    void visitVarDecl(VarDecl *VD)
+    {
+        handleAbstractStorageDecl (VD, VD->isLet (), false);
+    }
+    
+    void visitSubscriptDecl(SubscriptDecl *SD)
+    {
+        handleAbstractStorageDecl (SD, false, true);
     }
     
     
@@ -731,7 +747,11 @@ private:
                 print (param->getInterfaceType()->getInOutObjectType(), OTK_None);
             }
             else {
-                bool isEscaping = paramFlags.isNonEphemeral ();
+                bool isEscaping = false;
+                if (auto fType = param->getInterfaceType()->getAs<AnyFunctionType>()) {
+                    if (!fType->getExtInfo().isNoEscape())
+                        isEscaping = true;
+                }
                 // why square brackets, you might ask?
                 // It turns out that the language of attributes in swift is ambiguous.
                 // You can have
@@ -924,6 +944,15 @@ private:
             selStr = "subscript";
         return selStr;
     }
+    
+    Type getAbstractFunctionReturnType (AbstractFunctionDecl *AFD)
+    {
+        auto ty = AFD->getDeclContext()->isTypeContext() ?
+        AFD->getMethodInterfaceType() : AFD->getInterfaceType();
+        Type resultTy = ty->castTo<AnyFunctionType>()->getResult();
+        resultTy = resultTy->getDesugaredType ();
+        return resultTy;
+    }
 
     void printAbstractFunction(AbstractFunctionDecl *AFD, bool isClassMethod, bool isRequired) {
         
@@ -934,18 +963,13 @@ private:
         //        ObjCSelector sel = AFD->getObjCSelector();
         //        DeclName declName = AFD->getName();
         
-        
-        auto ty = AFD->getDeclContext()->isTypeContext() ?
-        AFD->getMethodInterfaceType() : AFD->getInterfaceType();
+        auto resultTy = getAbstractFunctionReturnType (AFD);
         
         AbstractStorageDecl *AD = nullptr;
         if (isa<AccessorDecl>(AFD)) {
             auto acc = cast<AccessorDecl>(AFD);
             AD = acc->getStorage();
         }
-        
-        Type resultTy = ty->castTo<AnyFunctionType>()->getResult();
-        resultTy = resultTy->getDesugaredType ();
         
         bool isDeprecated = AFD->getAttrs().getDeprecated(AFD->getASTContext());
         std::string flagAsDeprecated = isDeprecated ?
