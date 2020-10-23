@@ -52,6 +52,7 @@
             "remote": { "id": "apple/llvm-project" } }
     },
     "default-branch-scheme": "master",
+    "release/5.3-branch-tomswifty-branch-scheme": "release/5.3-branch-tomswifty",
     "branch-schemes": {
        "master": {
             "aliases": ["master", "swift/master"],

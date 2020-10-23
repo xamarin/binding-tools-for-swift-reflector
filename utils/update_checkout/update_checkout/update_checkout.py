@@ -571,7 +571,7 @@ repositories.
         # If branch is None, default to using the default branch alias
         # specified by our configuration file.
         if scheme is None:
-            scheme = config['default-branch-scheme']
+            scheme = config['release/5.3-branch-tomswifty-branch-scheme']
 
         skip_repo_list = skip_list_for_platform(config)
         skip_repo_list.extend(args.skip_repository_list)
