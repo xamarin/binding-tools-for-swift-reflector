@@ -351,8 +351,8 @@
                 "icu": "release-65-1",
                 "cmake": "v3.16.5",
                 "indexstore-db": "release/5.3-TJ",
-                "sourcekit-lsp": "main",
-                "swift-format": "main",
+                "sourcekit-lsp": "master",
+                "swift-format": "release/5.3-TJ",
                 "pythonkit": "main",
                 "tensorflow-swift-apis": "main"
             }
