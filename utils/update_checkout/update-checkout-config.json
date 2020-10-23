@@ -52,7 +52,6 @@
             "remote": { "id": "apple/llvm-project" } }
     },
     "default-branch-scheme": "master",
-    "release/5.3-branch-tomswifty-branch-scheme": "release/5.3-branch-tomswifty",
     "branch-schemes": {
        "master": {
             "aliases": ["master", "swift/master"],
@@ -327,6 +326,32 @@
                 "cmake": "v3.16.5",
                 "indexstore-db": "release/5.3-branch-tomswifty",
                 "sourcekit-lsp": "release/5.3-branch-tomswifty",
+                "swift-format": "main",
+                "pythonkit": "main",
+                "tensorflow-swift-apis": "main"
+            }
+        },
+        "release/5.3-TJ": {
+            "aliases": ["release/5.3-TJ", "swift/release/5.3-TJ"],
+            "repos": {
+                "llvm-project": "swift/release/5.3-TJ",
+                "swift": "release/5.3-TJ",
+                "cmark": "release/5.3-TJ",
+                "llbuild": "release/5.3-TJ",
+                "swift-tools-support-core": "release/5.3-TJ",
+                "swiftpm": "release/5.3-TJ",
+                "swift-syntax": "release/5.3-TJ",
+                "swift-stress-tester": "release/5.3-TJ",
+                "swift-corelibs-xctest": "release/5.3-TJ",
+                "swift-corelibs-foundation": "release/5.3-TJ",
+                "swift-corelibs-libdispatch": "release/5.3-TJ",
+                "swift-integration-tests": "release/5.3-TJ",
+                "swift-xcode-playground-support": "release/5.3-TJ",
+                "ninja": "release",
+                "icu": "release-65-1",
+                "cmake": "v3.16.5",
+                "indexstore-db": "release/5.3-TJ",
+                "sourcekit-lsp": "release/5.3-TJ",
                 "swift-format": "main",
                 "pythonkit": "main",
                 "tensorflow-swift-apis": "main"
