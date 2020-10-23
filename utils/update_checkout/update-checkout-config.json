@@ -300,7 +300,7 @@
                 "cmake": "v3.16.5",
                 "indexstore-db": "release/5.3",
                 "sourcekit-lsp": "release/5.3",
-                "swift-format": "master",
+                "swift-format": "main",
                 "pythonkit": "master",
                 "tensorflow-swift-apis": "master"
             }

@@ -318,7 +318,7 @@ def obtain_all_additional_swift_sources(args, config, with_ssh, scheme_name,
 
             repo_branch = None
             repo_not_in_scheme = False
-            scheme_name = "release/5.3-branch-tomswifty"
+            scheme_name = "release/5.3"
             if scheme_name:
                 for v in config['branch-schemes'].values():
                     if scheme_name not in v['aliases']:
