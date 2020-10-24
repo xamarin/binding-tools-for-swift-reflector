@@ -333,6 +333,11 @@ def obtain_all_additional_swift_sources(args, config, with_ssh, scheme_name,
                     repo_branch = scheme_name
             if repo_not_in_scheme:
                 continue
+                
+            if repo_name == "sourcekit-lsp":
+                repo_branch = "main"
+            if repo_name == "swift-format":
+                repo_branch = "main"
 
             pool_args.append([args, repo_name, repo_info, repo_branch, remote,
                               with_ssh, scheme_name, skip_history,
