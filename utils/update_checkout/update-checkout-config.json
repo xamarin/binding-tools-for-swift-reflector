@@ -352,7 +352,7 @@
                 "cmake": "v3.16.5",
                 "indexstore-db": "release/5.3-TJ",
                 "sourcekit-lsp": "master",
-                "swift-format": "release/5.3-TJ",
+                "swift-format": "swift-5.3-branch",
                 "pythonkit": "main",
                 "tensorflow-swift-apis": "main"
             }
