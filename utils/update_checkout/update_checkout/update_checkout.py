@@ -260,6 +260,7 @@ def obtain_additional_swift_sources(pool_args):
     with shell.pushd(args.source_root, dry_run=False, echo=False):
 
         print("Cloning '" + repo_name + "'")
+        print("Branch name: '" + repo_branch + "'")
 
         if skip_history:
             shell.run(['git', 'clone',
@@ -335,6 +336,7 @@ def obtain_all_additional_swift_sources(args, config, with_ssh, scheme_name,
                 continue
             
             repo_branch = "main"
+            print ("\n\nin obtain_all_additional_swift_resources: " + repo_name + ": " + repo_branch + "\n\n")
 
             # if repo_name == "sourcekit-lsp":
             #     repo_branch = "main"
