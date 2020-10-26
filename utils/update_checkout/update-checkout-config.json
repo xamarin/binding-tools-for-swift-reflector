@@ -334,7 +334,7 @@
         "release/5.3-TJ": {
             "aliases": ["release/5.3-TJ", "swift/release/5.3-TJ"],
             "repos": {
-                "llvm-project": "swift/release/5.3",
+                "llvm-project": "swift/main",
                 "swift": "release/5.3",
                 "cmark": "release/5.3",
                 "llbuild": "release/5.3",

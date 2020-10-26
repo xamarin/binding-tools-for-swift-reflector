@@ -260,7 +260,6 @@ def obtain_additional_swift_sources(pool_args):
     with shell.pushd(args.source_root, dry_run=False, echo=False):
 
         print("Cloning '" + repo_name + "'")
-        print("Branch name: '" + repo_branch + "'")
 
         if skip_history:
             shell.run(['git', 'clone',
@@ -319,7 +318,6 @@ def obtain_all_additional_swift_sources(args, config, with_ssh, scheme_name,
 
             repo_branch = None
             repo_not_in_scheme = False
-            scheme_name = "release/5.3-TJ"
             if scheme_name:
                 for v in config['branch-schemes'].values():
                     if scheme_name not in v['aliases']:
@@ -334,14 +332,6 @@ def obtain_all_additional_swift_sources(args, config, with_ssh, scheme_name,
                     repo_branch = scheme_name
             if repo_not_in_scheme:
                 continue
-            
-
-            if repo_name == "sourcekit-lsp":
-                repo_branch = "main"
-            if repo_name == "swift-format":
-                repo_branch = "main"
-
-            print ("\n\nEnd of obtain_all_additional_swift_resources: " + repo_name + ": " + repo_branch + "\n\n")
 
             pool_args.append([args, repo_name, repo_info, repo_branch, remote,
                               with_ssh, scheme_name, skip_history,
