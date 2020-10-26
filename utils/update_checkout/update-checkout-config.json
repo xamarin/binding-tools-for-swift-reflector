@@ -353,7 +353,7 @@
                 "indexstore-db": "release/5.3",
                 "sourcekit-lsp": "release/5.3",
                 "swift-format": "main",
-                "pythonkit": "main",
+                "pythonkit": "master",
                 "tensorflow-swift-apis": "master"
             }
         },
