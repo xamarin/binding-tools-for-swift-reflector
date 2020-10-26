@@ -346,7 +346,7 @@
                 "swift-corelibs-foundation": "release/5.3-branch-tomswifty",
                 "swift-corelibs-libdispatch": "release/5.3-branch-tomswifty",
                 "swift-integration-tests": "release/5.3-branch-tomswifty",
-                "swift-xcode-playground-support": "release/5.3-branch-tomswifty",
+                "swift-xcode-playground-support": "release/5.3",
                 "ninja": "release",
                 "icu": "release-65-1",
                 "cmake": "v3.16.5",
