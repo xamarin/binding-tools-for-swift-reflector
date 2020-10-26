@@ -354,7 +354,7 @@
                 "sourcekit-lsp": "main",
                 "swift-format": "main",
                 "pythonkit": "main",
-                "tensorflow-swift-apis": "main"
+                "tensorflow-swift-apis": "master"
             }
         },
        "master-rebranch": {
