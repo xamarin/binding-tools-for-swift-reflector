@@ -22,7 +22,6 @@ import pipes
 import platform
 import sys
 import time
-import six
 
 from build_swift.build_swift import argparse
 from build_swift.build_swift import defaults
@@ -33,6 +32,8 @@ from build_swift.build_swift.constants import BUILD_SCRIPT_IMPL_PATH
 from build_swift.build_swift.constants import SWIFT_BUILD_ROOT
 from build_swift.build_swift.constants import SWIFT_REPO_NAME
 from build_swift.build_swift.constants import SWIFT_SOURCE_ROOT
+
+import six
 
 from swift_build_support.swift_build_support import products
 from swift_build_support.swift_build_support import shell
