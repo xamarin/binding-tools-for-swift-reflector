@@ -341,7 +341,7 @@
                 "swift-tools-support-core": "release/5.3-branch-tomswifty",
                 "swiftpm": "release/5.3-branch-tomswifty",
                 "swift-syntax": "release/5.3",
-                "swift-stress-tester": "release/5.3-branch-tomswifty",
+                "swift-stress-tester": "release/5.3",
                 "swift-corelibs-xctest": "release/5.3-branch-tomswifty",
                 "swift-corelibs-foundation": "release/5.3-branch-tomswifty",
                 "swift-corelibs-libdispatch": "release/5.3-branch-tomswifty",
