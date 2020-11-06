@@ -52,7 +52,6 @@
             "remote": { "id": "apple/llvm-project" } }
     },
     "default-branch-scheme": "master",
-    "release/5.3-branch-tomswifty-branch-scheme": "release/5.3-branch-tomswifty",
     "branch-schemes": {
        "master": {
             "aliases": ["master", "swift/master"],
@@ -301,35 +300,9 @@
                 "cmake": "v3.16.5",
                 "indexstore-db": "release/5.3",
                 "sourcekit-lsp": "release/5.3",
-                "swift-format": "master",
+                "swift-format": "swift-5.3-branch",
                 "pythonkit": "master",
                 "tensorflow-swift-apis": "master"
-            }
-        },
-        "release/5.3-branch-tomswifty": {
-            "aliases": ["release/5.3-branch-tomswifty", "swift/release/5.3-branch-tomswifty"],
-            "repos": {
-                "llvm-project": "swift/release/5.3-branch-tomswifty",
-                "swift": "release/5.3-branch-tomswifty",
-                "cmark": "release/5.3-branch-tomswifty",
-                "llbuild": "release/5.3-branch-tomswifty",
-                "swift-tools-support-core": "release/5.3-branch-tomswifty",
-                "swiftpm": "release/5.3-branch-tomswifty",
-                "swift-syntax": "release/5.3-branch-tomswifty",
-                "swift-stress-tester": "release/5.3-branch-tomswifty",
-                "swift-corelibs-xctest": "release/5.3-branch-tomswifty",
-                "swift-corelibs-foundation": "release/5.3-branch-tomswifty",
-                "swift-corelibs-libdispatch": "release/5.3-branch-tomswifty",
-                "swift-integration-tests": "release/5.3-branch-tomswifty",
-                "swift-xcode-playground-support": "release/5.3-branch-tomswifty",
-                "ninja": "release",
-                "icu": "release-65-1",
-                "cmake": "v3.16.5",
-                "indexstore-db": "release/5.3-branch-tomswifty",
-                "sourcekit-lsp": "release/5.3-branch-tomswifty",
-                "swift-format": "main",
-                "pythonkit": "main",
-                "tensorflow-swift-apis": "main"
             }
         },
        "master-rebranch": {
