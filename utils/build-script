@@ -693,11 +693,21 @@ class BuildScriptInvocation(object):
                     args.install_prefix),
                 "--host-lipo", toolchain.lipo,
             ]
+        
+        # TJ adding this from https://github.com/apple/swift/pull/33939/files
+        # To fix issue with clang/math.h.
+        # For additional isolation, disable pkg-config. Homebrew's pkg-config
+        # prioritizes CommandLineTools paths, resulting in compile errors.
+        args.extra_cmake_options += [
+            '-DCMAKE_IGNORE_PATH=/usr/lib;/usr/local/lib;/lib',
+            '-DPKG_CONFIG_EXECUTABLE=/usr/bin/false',
+        ]
 
         if toolchain.libtool is not None:
             impl_args += [
                 "--host-libtool", toolchain.libtool,
             ]
+        # End of TJ edit
 
         # If we have extra_swift_args, combine all of them together and then
         # add them as one command.
