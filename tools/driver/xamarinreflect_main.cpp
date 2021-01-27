@@ -1112,7 +1112,6 @@ private:
     void ToPrecedenceGroupName (OperatorDecl *op)
     {
         if (!isa<InfixOperatorDecl>(op)) {
-            _out << "\"None\"";
             return;
         }
         auto infix = (InfixOperatorDecl *)op;
