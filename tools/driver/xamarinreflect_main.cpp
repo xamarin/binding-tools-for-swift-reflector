@@ -1116,7 +1116,8 @@ private:
             return;
         }
         auto infix = (InfixOperatorDecl *)op;
-        filterString(infix->getName().str());
+        auto group = op->getPrecedenceGroup ();
+        filterString(group->getName().str());
     }
     
 };
