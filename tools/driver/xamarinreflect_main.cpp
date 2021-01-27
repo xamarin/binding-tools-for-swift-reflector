@@ -672,6 +672,20 @@ private:
         ExistentialLayout layout = PCT->getExistentialLayout ();
         printExistentialLayout (layout, optionalKind);
     }
+    
+    void visitOperatorDecl(OperatorDecl *OP)
+    {
+        indents ();
+        // I don't think we need the other elements such as
+        // associativity, isAssignment, etc.
+        // Those could go into a separate <precedencegroup> tag at some point in the future
+        _out << "<operator name =\"";
+        auto name = OP->getName ();
+        filterString (name.str());
+        _out << "\" operatorKind=" << ToOperatorKind (OP) << " precedenceGroup=\"";
+        ToPrecedenceGroupName (OP);
+        _out << "\" />\n";
+    }
 
     void printExistentialLayout (ExistentialLayout layout, Optional<OptionalTypeKind> optionalKind)
     {
@@ -1038,20 +1052,7 @@ private:
         if (AFD->isOperator()) {
             FuncDecl *FS = (FuncDecl *)AFD;
             OperatorDecl *op = FS->getOperatorDecl();
-            switch (op->getKind()) {
-                case DeclKind::PrefixOperator:
-                    operatorKind = "\"Prefix\"";
-                    break;
-                case DeclKind::PostfixOperator:
-                    operatorKind = "\"Postfix\"";
-                    break;
-                case DeclKind::InfixOperator:
-                    operatorKind = "\"Infix\"";
-                    break;
-                default:
-                    operatorKind = "\"Unknown\"";
-                    break;
-            }
+            operatorKind = ToOperatorKind (op);
         }
         
         const auto &params = AFD->getParameters();
@@ -1092,6 +1093,30 @@ private:
         exdent();
         indents();
         _out << "</func>\n";
+    }
+    
+    std::string ToOperatorKind (OperatorDecl *op)
+    {
+        switch (op->getKind()) {
+            case DeclKind::PrefixOperator:
+                return "\"Prefix\"";
+            case DeclKind::PostfixOperator:
+                return "\"Postfix\"";
+            case DeclKind::InfixOperator:
+                return "\"Infix\"";
+            default:
+                return "\"Unknown\"";
+        }
+    }
+    
+    void ToPrecedenceGroupName (OperatorDecl *op)
+    {
+        if (!isa<InfixOperatorDecl>(op)) {
+            _out << "\"None\"";
+            return;
+        }
+        auto infix = (InfixOperatorDecl *)op;
+        filterString(infix->getName().str());
     }
     
 };
